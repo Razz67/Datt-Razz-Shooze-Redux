@@ -1,20 +1,29 @@
-const app = require("./app");
-const dotenv = require("dotenv");
-const connectDatabase = require("./db/Database.js");
-
+const express = require("express");
+const mongoConfig = require("./config");
 
 // Config
-dotenv.config({ 
-    path: "backend/config/.env" 
-});
+require("dotenv").config();
 
-// Connect to database
-connectDatabase();
+// App
+const app = express();
+
+// Import all routes
+const products = require('./routes/ProductRoute');
+
+
+// Middleware
+app.use(express.json());
+app.use('/api/v1', products);
 
 
     
 
-// Create server
-const server = app.listen(process.env.PORT, () => {
-    console.log(`Server running on port: ${process.env.PORT}`);
-})
+// Identify the port
+const port = process.env.PORT;
+
+app.listen(port, () => {
+    console.log(`Server started on port ${port}`);
+});
+
+// Connect to database
+mongoConfig();
