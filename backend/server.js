@@ -1,33 +1,35 @@
 const express = require("express");
+const app = express();
+const bodyParser = require("body-parser");
 const mongoConfig = require("./config");
-// const ErrorHandler = require("./middleware/error"); // Expres has default error handling
+const ErrorHandler = require("./middleware/error");
 
-// handling uncaught exceptions
-// process.on("uncaughtException", (err) => {
-//     console.log(`ERROR: ${err.message}`);
-//     console.log("Shutting down due to uncaught exception");
-//     process.exit(1);
-// });
 
+// Middleware
+app.use(express.json());
+app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
+
+
+// Handle uncaught exceptions
+process.on("uncaughtException", (err) => {
+	console.log(`ERROR: ${err.message}`);
+	console.log("Shutting down due to uncaught exception");
+	process.exit(1);
+});
 
 
 
 // Config
 require("dotenv").config();
 
-// App
-const app = express();
 
 // Import all routes
-const products = require("./routes/ProductRoute");
+const product = require("./routes/ProductRoute");
 const user = require("./routes/UserRoute");
-// Middleware
-app.use(express.json());
-app.use("/api/v1", products);
+
+app.use("/api/v1", product);
 app.use("/api/v1", user);
-
-
-// app.use(ErrorHandler);  // Used for error handling but i think it is not needed
 
 // Identify the port
 const port = process.env.PORT;
@@ -39,12 +41,14 @@ app.listen(port, () => {
 // Connect to database
 mongoConfig();
 
+// Unhancdled promise rejections
+process.on("unhandledRejection", (err, promise) => {
+	console.log(`Shuttin down sever for: ${err.message}`);
+	console.log(`Shutting Down server: ${err}`);
 
-// Unhancdled promise rejections (I think this is built in)
-// process.on("unhandledRejection", (err, promise) => {
-//     console.log(`Shuttin down sever for: ${err.message}`);
-//     console.log(`Shutting Down server: ${err}`);
+	// Close server & exit process
+	server.close(() => process.exit(1));
+});
 
-//     // Close server & exit process
-//     server.close(() => process.exit(1));
-// });
+
+app.use(ErrorHandler);
