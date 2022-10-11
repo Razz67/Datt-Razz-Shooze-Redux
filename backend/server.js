@@ -20,10 +20,13 @@ const app = express();
 
 // Import all routes
 const products = require("./routes/ProductRoute");
-
+const user = require("./routes/UserRoute");
 // Middleware
 app.use(express.json());
 app.use("/api/v1", products);
+app.use("/api/v1", user);
+
+
 // app.use(ErrorHandler);  // Used for error handling but i think it is not needed
 
 // Identify the port
